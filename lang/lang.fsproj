@@ -9,7 +9,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GenSound.fs" />
+    <Compile Include="AudioGen.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 </Project>

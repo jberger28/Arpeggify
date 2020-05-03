@@ -10,6 +10,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioGen.fs" />
+    <Compile Include="ProjectParser.fs" />
+    <Compile Include="ProjectInterpreter.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 </Project>

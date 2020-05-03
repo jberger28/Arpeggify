@@ -1,4 +1,4 @@
-﻿module CS334
+﻿module AudioGen
 open FSound.Signal
 open FSound.IO
 

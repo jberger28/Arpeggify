@@ -1,7 +1,7 @@
 ﻿open System
-open FSound.Signal
-open FSound.IO
-open CS334
+open AudioGen
+open ProjectParser
+open ProjectInterpreter
 
 [<EntryPoint>]
 let main argv =

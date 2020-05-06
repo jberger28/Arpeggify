@@ -54,12 +54,12 @@ let note = parseA <|> parseB <|> parseC <|> parseD <|> parseE <|> parseF <|> par
 
 // accidental parsers
 let sharp = pchar '#' |>> (fun _ -> Sharp)
-let flat = pchar '#' |>> (fun _ -> Flat)
+let flat = pchar 'b' |>> (fun _ -> Flat)
 
 let symbol = sharp <|> flat
 let accidental = (pseq note symbol (fun (a,b) -> (a,b))) |>> (fun e -> Accidental e)
 
-let root = note <|> accidental
+let root = accidental <|> note
 
 // chord extension parsers
 let major7 = pstr "Ma7" |>> (fun _ -> Major7)

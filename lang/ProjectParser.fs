@@ -4,6 +4,7 @@ open Parser
 // Simple Example:
 // (E-7,A7,D-7,G7)(4,4,4,4)||
 
+(* ARPEGGIFY GRAMMAR *)
 type Note = 
 | A 
 | B 
@@ -72,7 +73,7 @@ let chord: Parser<Chord> = pseq root extension (fun (a,b) -> (a,b))
 let rhythm: Parser<Rhythm> = pdigit |>> (fun e -> System.Char.GetNumericValue e |> int) // FIX THIS
 let phrase: Parser<Phrase> = pseq (parensAndCommas chord) (parensAndCommas rhythm) (fun (a,b) -> (a,b))
 let finish = pstr "||" |>> (fun _ -> End)
-let repeat = pleft pdigit (pstr ":|") |>> (fun e -> Repeat (System.Char.GetNumericValue e |> int))
+let repeat = pleft pdigit (pstr ":|") |>> (fun e -> Repeat (System.Char.GetNumericValue e |> int)) //FIX THIS
 let ending = finish <|> repeat
 let tune: Parser<Tune> = pseq (pmany1 phrase) ending (fun (a,b) -> (a,b))
 

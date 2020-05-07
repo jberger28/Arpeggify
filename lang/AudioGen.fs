@@ -34,7 +34,12 @@ let addPitch pitch noteSeq =
                       (time + 0.25, generators.[pitch]) :: noteSeq
     | _            -> (0.0, generators.[pitch]) :: noteSeq
 
+let arranged noteSeq = [arrange (List.rev noteSeq)]
 
+let writeFile output fileName = 
+    (List.map(generate 44100.0 60.0)) output |> streamToWav 44100 2 fileName
+
+(*
 // BELOW CODE WORKS
 // one octave of white keys
 //let (c, d, e, f, g, a, b) = (gen 261.63, gen 293.66, gen 329.63, gen 349.23, gen 392.00, gen 440.00, gen 493.88)
@@ -46,8 +51,4 @@ let addNote note noteSeq =
                       (time + 0.25, note) :: noteSeq
     | _            -> (0.0, note) :: noteSeq
 
-
-let arranged noteSeq = [arrange (List.rev noteSeq)]
-
-let writeFile output fileName = 
-    (List.map(generate 44100.0 60.0)) output |> streamToWav 44100 2 fileName
+    *)

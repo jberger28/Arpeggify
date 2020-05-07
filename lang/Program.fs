@@ -7,10 +7,13 @@ open ProjectInterpreter
 let main argv =
     let parsed = parse argv.[0]
     //printf "%A" (parse argv.[0])
-    printf "%A" parsed
+   //printf "%A" parsed
 
+
+    let interpreted = eval parsed
+    writeFile (arranged interpreted) "maybe.wav"
     //writeFile (arranged(addNote b (addNote f (addNote d (addNote e (addNote c [])))))) "test.wav"
-    //printfn "Success"
+    printfn "Success"
 
     //writeFile (arranged(addPitch 4 (addPitch 5 (addPitch 7 (addPitch 9 (addPitch 11 (addPitch 7 (addPitch 4 (addPitch 0 []))))))))) "boop.wav"
     0

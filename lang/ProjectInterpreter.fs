@@ -2,27 +2,13 @@
 open ProjectParser
 open AudioGen
 
-    
-(*
-let rec eval e noteSeq = 
-    match box e with
-    | :? (Phrase list * Ending) -> failwith "hi"
-    | :? Ending -> failwith "hi"
-    | :? Phrase -> failwith "hi"
-    | :? Chord -> failwith "hi"
-    | :? Extension -> failwith "hi"
-    | :? Symbol -> evalSymbol e
-    | :? Note -> evalNote e
-    | _ -> failwith "error"
-    *)
-
-// calculate new note
+// Calculate amount to modify note by
 let evalSymbol s = 
     match s with 
     | Sharp -> 1
     | Flat -> -1
 
-// return numeric representation of note
+// return numeric representation of note, notes represented by their distance in half steps from C = 261.64 HZ
 let evalNote n = 
     match n with
     | C -> 0
@@ -33,54 +19,52 @@ let evalNote n =
     | A -> 9
     | B -> 11   
 
-// return number
+// return number representing root
 let rec evalRoot r = 
     match r with 
     | Note n -> evalNote n
     | Accidental (n,s) -> evalRoot n + evalSymbol s
 
-// eval extension - return list of notes
+// eval extension - return array of notes within a given chord
 let evalExt e = 
     match e with
     | Major7 -> [4; 7; 11]
     | Minor7 -> [3; 7; 10]
     | Dom7 -> [4; 7; 10]
 
+// Return list of note arrays, each one corresponding to the notes within a specified chord
 let rec evalChord cs = 
     match cs with
     | head :: tail ->
         let (r,e) = head
-        let arp = (evalRoot r) :: []
         let root = evalRoot r
-        List.append (root :: (List.map (fun x -> x + root)(evalExt e))) (evalChord tail)
+        let notesInChord = List.toArray(root :: (List.map (fun x -> x + root)(evalExt e)))
+        notesInChord :: evalChord tail
     | _ -> []
 
-// return int * int list
-let rec evalPhrase ps = 
+// Return an (int[] * Rhythm) list, matching each chord's notes with that chord's length
+let rec evalPhrase (ps: Phrase list) = 
     match ps with
     | head :: tail ->
-       let (c,r) = head
-       //let cs = evalChord c
-       //let rs = [4; 4; 4; 4]
-       List.append(List.zip (evalChord c) [4; 4; 4; 4;4; 4; 4; 4;4; 4; 4; 4;4; 4; 4; 4]) (evalPhrase tail)                
+       let (cs,rs) = head
+       let notes = evalChord cs
+       List.append (List.zip notes rs) (evalPhrase tail)               
     | _ -> []
 
-// ENDING
+// TODO: ENDING EVALUATOR
 
-let eval tune = 
-    match tune with 
-    | Some t -> 
-        let (ps, ending) = t
-        let output = evalPhrase ps
-        let (notes, _) = List.unzip output
-        let noteSeq = []
-        List.fold (fun acc elem -> addPitch elem acc) [] notes
-    | None -> failwith "Error"
+// Choose appropriate notes to create arpeggios, AKA, where the magic happens
+let rec arpeggiate (evaled: (int [] * Rhythm) list) = 
+    match evaled with 
+    | head :: tail -> 
+        match head with
+            | (notes, number) -> 
+                let list = [0 .. number-1] // list represents each note played to satisfy rhythm
+                List.append (List.map(fun x -> notes.[x % 4]) list) (arpeggiate tail)
+    | _ -> []
 
-    (*
-let eval (t:Tune) = 
-    let (pl, ending) = t
-    let phrases = evalPhrase pl
-    let fini = eval ending
-    failwith "not done"
-    *)
+// evaluate tune
+let eval tune filename = 
+    let (ps,ending) = tune
+    generateAudio (arpeggiate (evalPhrase ps)) filename
+    // eval ending too

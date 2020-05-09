@@ -1,9 +1,6 @@
 ﻿module ProjectParser
 open Parser
 
-// Simple Example:
-// (E-7,A7,D-7,G7)(4,4,4,4)||
-
 (* ARPEGGIFY GRAMMAR *)
 type Note = 
 | A 
@@ -39,8 +36,10 @@ type Ending =
 
 type Tune = Phrase list * Ending
 
-
+// Parser for items separated by commas
 let commaSep p = pseq (pmany0 (pleft p (pchar ','))) (pmany1 (p)) (fun (a,b) -> List.append a b)
+
+// Parser for items separated by commas and enclosed between parens
 let parensAndCommas p = pbetween (pchar '(') (pchar ')') (commaSep p)
 
 // note parsers
@@ -53,7 +52,7 @@ let parseF = pchar 'F' |>> (fun _ -> F)
 let parseG = pchar 'G' |>> (fun _ -> G)
 let note = parseA <|> parseB <|> parseC <|> parseD <|> parseE <|> parseF <|> parseG |>> (fun e -> Note e)
 
-// accidental parsers
+// accidental parsers ie. sharp and flat
 let sharp = pchar '#' |>> (fun _ -> Sharp)
 let flat = pchar 'b' |>> (fun _ -> Flat)
 
@@ -71,7 +70,7 @@ let extension = major7 <|> minor7 <|> dom7
 let chord: Parser<Chord> = pseq root extension (fun (a,b) -> (a,b))
 //let rhythm: Parser<Rhythm> = psat (fun c -> int c >= 0 && int c <= 8) |>> (fun e -> int e)
 let rhythm: Parser<Rhythm> = pdigit |>> (fun e -> System.Char.GetNumericValue e |> int) // FIX THIS
-let phrase: Parser<Phrase> = pseq (parensAndCommas chord) (parensAndCommas rhythm) (fun (a,b) -> (a,b))
+let phrase: Parser<Phrase> = pseq (parensAndCommas chord) (parensAndCommas rhythm) (fun (a,b) -> (a,b)) // TODO - MULTIPLE PHRASES
 let finish = pstr "||" |>> (fun _ -> End)
 let repeat = pleft pdigit (pstr ":|") |>> (fun e -> Repeat (System.Char.GetNumericValue e |> int)) //FIX THIS
 let ending = finish <|> repeat
@@ -79,6 +78,7 @@ let tune: Parser<Tune> = pseq (pmany1 phrase) ending (fun (a,b) -> (a,b))
 
 let grammar = pleft tune peof
 
+// Parse a tune
 let parse input : Tune option = 
         //let input' = debug input
         let input' = prepare input

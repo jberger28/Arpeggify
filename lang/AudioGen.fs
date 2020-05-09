@@ -2,53 +2,33 @@
 open FSound.Signal
 open FSound.IO
 
+(* ARPEGGIFY CROSS-PLATFORM LIBRARY FOR GENERATING .WAV FILES USING FSound *)
 
 // return a pitch generator
 let gen pitch = modulate (triangle 15000.0 pitch) (adsr 0.05 1.0 0.05 0.3 0.1 0.05)
-
-
-(*
-// calculate correct frequency
-let findFreq pitch = 2.0 ** (pitch - 9.0)/12.0 * 440.0
-
-// map of note names and generators
-let genMap = Map.empty
-
-// Check for or update pitch generator in map
-let updateMap pitch = 
-    if Map.containsKey pitch genMap then
-        genMap
-    else 
-        Map.add pitch (findFreq pitch) genMap
-
-// FIGURE OUT MAPPING LATER
-*)
 
 // create generators for two octaves
 let generators =
    [| for i in 0 .. 23 -> gen (2.0 ** (float i/12.0) * 261.64) |]
 
+// Add new frequency generator to a certain time of our track, TODO: update to change time between notes
 let addPitch pitch noteSeq = 
     match noteSeq with
     | head :: tail -> let (time, _) = head
                       (time + 0.25, generators.[pitch]) :: noteSeq
     | _            -> (0.0, generators.[pitch]) :: noteSeq
 
+
+// prepare note list to be written to wav
 let arranged noteSeq = [arrange (List.rev noteSeq)]
 
-let writeFile output fileName = 
-    (List.map(generate 44100.0 60.0)) output |> streamToWav 44100 2 fileName
+// Writes output to wav file
+let writeFile output length fileName = 
+    (List.map(generate 44100.0 length)) output |> streamToWav 44100 2 fileName
 
-(*
-// BELOW CODE WORKS
-// one octave of white keys
-//let (c, d, e, f, g, a, b) = (gen 261.63, gen 293.66, gen 329.63, gen 349.23, gen 392.00, gen 440.00, gen 493.88)
-
-// prepend a note-timestamp tuple to our list of notes
-let addNote note noteSeq = 
-    match noteSeq with
-    | head :: tail -> let (time, _) = head
-                      (time + 0.25, note) :: noteSeq
-    | _            -> (0.0, note) :: noteSeq
-
-    *)
+// Entry point to this library, creates wav file of a specified list of notes
+let generateAudio output fileName = 
+    let notes = (List.fold (fun acc elem -> addPitch elem acc) [] output)
+    let (times,_) = List.unzip notes
+    let length = List.max times
+    writeFile (arranged notes) (length + 1.0) fileName

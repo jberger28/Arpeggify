@@ -1,7 +1,7 @@
 ﻿module ProjectInterpreter
 open ProjectParser
 open AudioGen
-
+(*
 // Calculate amount to modify note by
 let evalSymbol s = 
     match s with 
@@ -68,3 +68,4 @@ let eval tune filename =
     let (ps,ending) = tune
     generateAudio (arpeggiate (evalPhrase ps)) filename
     // eval ending too
+    *)

@@ -1,0 +1,5 @@
+Rhythms r = (5)
+Chords c = (F7)
+Phrase p = (c:r)
+Phrase p = (F-7,Bb7,Eb-7), (3,3,3)
+Tune t = (p,p)

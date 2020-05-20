@@ -21,11 +21,23 @@ let main argv =
 
     let file = argv.[0]
     let input = File.ReadAllText file
-    match parse input with
-    | Some t -> printfn "%A" t
-    | None -> printfn "whoops :("
+    let parsed = parse input
+    printfn "Parsed: %A" parsed
+    match parsed with
+    | Some t ->
+        let result = eval t Map.empty
+        if result = 0 then
+            printfn "Program ran successfully!"
+    | None -> failwith "Unable to Parse"
     0
 
+    (*
+    match parse input with
+    | Some t -> printfn "Parsed successfully!"
+                eval t Map.empty
+    | None -> exit 1
+    0
+    *)
 
     (* old 
     match (parse argv.[0]) with

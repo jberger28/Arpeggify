@@ -36,7 +36,7 @@ type Chord = Root * Extension
 
 type Phrase = 
 | PhraseLit of Chord list * Rhythm list
-| PhraseVar of string list
+| PhraseVar of string * string
 
 type Tune = 
 | TuneLit of Phrase list
@@ -56,16 +56,17 @@ type Expr =
 
 let expr, exprImpl = recparser()
 
-// Parser for items separated by commas, accounting for whitespace
+(* Parser for items separated by commas, allowing for whitespace *)
 let commaSep p = pseq (pmany0 (pleft (pleft p pws0) (pleft (pchar ',') pws0))) (pmany1 (p)) (fun (a,b) -> List.append a b) 
                 <!> "comma-sep"
 
-// Parser for items separated by commas and enclosed between parens
+(* Parser for items separated by commas and enclosed between parens, allowing for variable whitespace *)
 let parensAndCommas p = pbetween (pleft (pchar '(') pws0) (pright pws0 (pchar ')')) (commaSep p) <!> "parens and commas"
 
-let alphanum = pmany1 (pletter <|> pdigit) |>> stringify <!> "alphanum"
+(* A string of letters *)
+let alpha = pmany1 pletter |>> stringify <!> "alpha"
 
-// note parsers
+(* Note parsers *)
 let parseA = pchar 'A' |>> (fun _ -> A) <!> "A"
 let parseB = pchar 'B' |>> (fun _ -> B) <!> "B"
 let parseC = pchar 'C' |>> (fun _ -> C) <!> "C"
@@ -73,55 +74,75 @@ let parseD = pchar 'D' |>> (fun _ -> D) <!> "D"
 let parseE = pchar 'E' |>> (fun _ -> E) <!> "E"
 let parseF = pchar 'F' |>> (fun _ -> F) <!> "F"
 let parseG = pchar 'G' |>> (fun _ -> G) <!> "G"
-
 let note = parseA <|> parseB <|> parseC <|> parseD <|> parseE <|> parseF <|> parseG |>> (fun e -> Note e) <!> "note"
 
-// accidental parsers ie. sharp and flat
+(* Accidental parsers, ie. sharp and flat *)
 let sharp = pchar '#' |>> (fun _ -> Sharp) <!> "sharp"
 let flat = pchar 'b' |>> (fun _ -> Flat) <!> "flat"
-
 let symbol = sharp <|> flat <!> "symbol"
 let accidental = (pseq note symbol (fun (a,b) -> (a,b))) |>> (fun e -> Accidental e) <!> "accidental"
 
+(* Root parser, a note or note with accidental *)
 let root = accidental <|> note <!> "root"
 
-// chord extension parsers
+(* Chord extension parsers *)
 let major7 = pstr "Ma7" |>> (fun _ -> Major7) <!> "major7"
 let minor7 = pstr "-7" |>> (fun _ -> Minor7) <!> "minor7"
 let dom7 = pchar '7' |>> (fun _ -> Dom7) <!> "dom7"
 let extension = major7 <|> minor7 <|> dom7 <!> "extension"
 
+(* Parser for one chord, a root followed by an extension *)
 let chord: Parser<Chord> = pseq root extension (fun (a,b) -> (a,b)) <!> "chord"
+
+(* Parser for paren-enclosed, comma-separated chords *)
 let pchords = parensAndCommas chord |>> Chords <!> "pchords"
 
+(* Parser for one rhythm, a positive number *)
 let rhythm: Parser<Rhythm> = pdigit |>> (fun e -> System.Char.GetNumericValue e |> int) <!> "rhythm"
+
+(* Parser for multiple paren-enclosed, comma-separated chords *)
 let prhythms = parensAndCommas rhythm |>> Rhythms <!> "prhythms"
 
-
+(* Phrase from literal *)
 let phraselit = pseq (pleft (parensAndCommas chord) (pbetween pws0 pws0 (pchar ','))) (parensAndCommas rhythm) (fun (a,b) -> (a,b)) |>> PhraseLit <!> "phraselit"
-let phrasevar = parensAndCommas alphanum |>> PhraseVar <!> "phrasevar"
+
+(* Phrase from variables *)
+//let phrasevar = parensAndCommas alpha |>> PhraseVar <!> "phrasevar"
+let phrasevar = pbetween (pleft (pchar '(') pws0) (pright pws0 (pchar ')')) (pseq (pleft alpha (pright pws0 (pchar ':')))(pright pws0 alpha) (fun (a,b) -> (a,b))) |>> PhraseVar <!> "phrasevar"
+
+(* A phrase, either from a literal or from rhythm and chord variables *)
 let phrase: Parser<TuneBuilder> = phraselit <|> phrasevar |>> Phrase <!> "phrase"
 
+(* Tune from phrase literals *)
 let tunelit = parensAndCommas phraselit <|> parensAndCommas phrasevar |>> TuneLit <!> "tunelit"
-let tunevar: Parser<Tune> = parensAndCommas alphanum |>> TuneVar <!> "tunevar"
 
+(* Tune as combination of phrase variables *)
+let tunevar: Parser<Tune> = parensAndCommas alpha |>> TuneVar <!> "tunevar"
+
+(* Tune from phrase literals or variables *)
 let tune = tunelit <|> tunevar |>> Tune <!> "tune"
 
-
+(* Tune builder, a tune, phrase, list of chords, or list of rhythms *)
 let tunebuilder = tune <|> phrase <|> pchords <|> prhythms <!> "tunebuilder"
+//let tunebuilder = phrase <|> pchords <|> prhythms <!> "tunebuilder"
 
+(* Allowed variable types *)
 let tvar = pstr "Tune" |>> (fun _ -> TVar) <!> "tunevar"
-let pvar = pstr "Phrase" |>> (fun _ -> PVar) <!> "phrasevar"
+let pvar = pstr "Phrase" |>> (fun _ -> PVar) <!> "pvar"
 let cvar = pstr "Chords" |>> (fun _ -> CVar) <!> "chordsvar"
 let rvar = pstr "Rhythms" |>> (fun _ -> RVar) <!> "rhythmsvar"
-
-let operator = pbetween pws0 pws0 (pchar '=') <!> "operator"
 let typename = tvar <|> pvar <|> cvar <|> rvar <!> "typename"
-let lhs = pseq (pleft typename pws0) (pleft alphanum operator) (fun (a,b) -> (a,b)) <!> "lhs"
-let assignment = pseq lhs tunebuilder  (fun (a,b) -> (a,b)) |>> Assignment <!> "assignment"
 
+(* Equals sign in between variable whitespace *)
+let operator = pbetween pws0 pws0 (pchar '=') <!> "operator"
+
+(* Left-hand side of assignment, ie. type name and variable name*)
+let lhs = pseq (pleft typename pws0) (pleft alpha operator) (fun (a,b) -> (a,b)) <!> "lhs"
+let assignment : Parser<Expr> = pseq lhs tunebuilder  (fun (a,b) -> (a,b)) |>> Assignment <!> "assignment"
+
+(* Sequence operator, one or more expressions *)
 let sequence =
-    pmany1 ((pleft expr pnl) <|> expr)
+    pmany1 ((pleft assignment (pmany1 pnl)) <|> assignment)
     |>> (fun es ->
             es
             |> List.rev
@@ -129,14 +150,16 @@ let sequence =
         )
     <!> "sequence"
 
+(* If not a sequence, then an assignment *)
 exprImpl := assignment <!> "expr"
 
+(* Check for sequence first *)
 let grammar = pleft sequence peof
 
 // Parse an arpeggify program
 let parse input : Expr option = 
-        let input' = debug input
-        //let input' = prepare input
+        //let input' = debug input
+        let input' = prepare input
         match grammar input' with
         | Success(res,_)     -> Some res
         | Failure(pos, rule) ->

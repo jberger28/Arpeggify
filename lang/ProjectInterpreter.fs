@@ -8,7 +8,7 @@ type Env = Map<string, TuneBuilder>
 // function to provide usage info
 let usage = 
     printfn "\nUsage:\ndotnet run <program.arp> <output.wav>\nor\ndotnet run <program.arp> <output.wav> <beats per minute>\n"
-    printfn "To run the program \'blues.arp\' in the \'examples\' directory at 150 BPM type:\ndotnet run ../examples/blues.arp blues.wav 150\n"
+    printfn "To run the program \'example-1.arp\' in the \'examples\' directory at 150 BPM type:\ndotnet run ../examples/example-1.arp example-1.wav 150\n"
     printfn "Arpeggify arpeggiates the tune provided in the last line of a program, \nwriting the musical output to a wav file"
     printfn "\n## END ARPEGGIFY INTERPRETER ##"
 

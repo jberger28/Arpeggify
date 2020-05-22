@@ -1,0 +1,13 @@
+Chords cOne = (BMa7, D7,  GMa7, Bb7, EbMa7, A-7, D7)
+Rhythms rOne = (2,2,2,2,4,2,2)
+
+Chords cTwo = (GMa7, Bb7, EbMa7, F#7, BMa7, F-7, Bb7)
+Rhythms rTwo = (2,2,2,2,4,2,2)
+
+Chords cThree = (EbMa7,  A-7, D7, GMa7, C#-7, F#7)
+Rhythms rThree = (4,2,2,4,2,2)
+
+Chords cFour = (BMa7, F-7, Bb7, EbMa7, C#-7, F#7)
+Rhythms rFour = (4,2,2,4,2,2)
+
+Tune giantSteps = ((cOne,rOne), (cTwo,rTwo),(cThree,rThree),(cFour, rFour), END)

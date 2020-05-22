@@ -1,3 +1,0 @@
-chords c = (E-7, A7, D-7, G7) rhythm r = (4 -> all)
-phrase p = (c,r)
-tune t = p

@@ -1,7 +1,0 @@
-Chords c =  (E-7,A7,D-7  ,G7)
-Chords g = (E-7, AMa7, D7, F7)
-Rhythms r = ( 4 , 4 , 4   , 4      )
-Phrase p = (c,r)
-Phrase p2 = (g,r)
-Tune t    = (p,p2)
-Tune g = ((E-7,A7,D-7  ,G7),(5,5,5,5))

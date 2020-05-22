@@ -1,0 +1,13 @@
+Chords aChords = (C7, C7, C7, C7)
+Chords bChords = (F7, F7, C7, C7)
+Chords cChords = (G7, F7, C7, C7)
+
+Rhythms rA = (4,4,4,4)
+Rhythms rB = (4,4,4,4)
+Rhythms rC = (4,4,4,4)
+
+Phrase pA = (aChords:rA)
+Phrase pB = (bChords:rB)
+Phrase pC = (cChords:rC)
+
+Tune blues = (pA,pB,pC,END)

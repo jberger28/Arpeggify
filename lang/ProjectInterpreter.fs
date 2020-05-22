@@ -5,10 +5,17 @@ open AudioGen
 (* Environment to store variables *)
 type Env = Map<string, TuneBuilder>
 
+// function to provide usage info
+let usage = 
+    printfn "\nUsage:\ndotnet run <program.arp> <output.wav>\nor\ndotnet run <program.arp> <output.wav> <beats per minute>\n"
+    printfn "To run the program \'blues.arp\' in the \'examples\' directory at 150 BPM type:\ndotnet run ../examples/blues.arp blues.wav 150\n"
+    printfn "Arpeggify arpeggiates the tune provided in the last line of a program, \nwriting the musical output to a wav file"
+    printfn "\n## END ARPEGGIFY INTERPRETER ##"
+
 (* Used to fail with error and exit *)
 let fail msg = 
     printfn "\n%s" msg
-    printfn "\n-- END ARPEGGIFY INTERPRETER --"
+    printfn "\n## END ARPEGGIFY INTERPRETER ##"
     exit 1
 
 // Calculate amount to modify note by
@@ -62,91 +69,92 @@ let rec evalPhrase (ps: Phrase list) =
         | _ -> fail "Error: phrase list cannot be evaluated correctly"              
     | _ -> []
 
-// Evaluate an assignment operation, retrieving stored info from environment if necessary,
-// returns tuple of return value and new environment
+(* Retrive a phrase from our environment, checking that chords and rhythms are of same length *)
+let retrievePhrase env p = 
+    match p with
+    | PhraseLit _ -> p
+    | PhraseVar (c,r) -> 
+        // replace with function
+        match Map.tryFind c env with
+        | Some chords ->
+            match chords with
+            | Chords chords -> 
+                match Map.tryFind r env with
+                | Some rhythms ->
+                    match rhythms with
+                    | Rhythms rhythms -> 
+                        if List.length chords = List.length rhythms then 
+                            (chords,rhythms) |> PhraseLit
+                        else fail "Error: Attempting to assign different length chords and rhythms to a phrase"
+                    | _ -> fail "Error: variabe not of type Rhythms"
+                | None -> sprintf "Error: variable %s not defined" r |> fail
+            | _ -> fail "Error: variable not of type Chords"
+        | None -> sprintf "Error: variable %s not yet defined" c |> fail
+
+(* Evaluate a tune variable assignment *)
+let evalTuneAssignment varName tb env = 
+    let t = tb
+    match t with
+    | Tune t -> 
+        match t with
+        // if a list of phrase literals, combine each into a phrase and combine phrases into a tune
+        | TuneLit ps -> 
+            let tune = ps |> List.map (retrievePhrase env) |> TuneLit |> Tune
+            tune, Map.add varName tune env
+        // if a combination of variables, retrieve meaning of phrase variables and combine into a tune
+        | TuneVar vs -> 
+            let retrieve p : Phrase = 
+                match Map.tryFind p env with
+                | Some phrase -> 
+                    match phrase with
+                    | Phrase phrase -> phrase
+                    | _ -> sprintf "Error: variable %s not of type Tune" varName |> fail
+                | None -> sprintf  "Error: variable %s is not defined" varName |> fail
+
+            let tune = vs |> List.map retrieve |> TuneLit |> Tune
+            tune, Map.add varName tune env
+    | _ -> fail "Type mismatch: Attempting to assign something other than a tune to a Tune variable"
+
+(* Evaluate a phrase variable assignment *)
+let evalPhraseAssignment varName tb env = 
+    let p = tb     
+    match p with
+    | Phrase ph ->
+        match ph with
+        // if a literal, add to map as is
+        | PhraseLit(cs, rs) -> 
+            if List.length cs = List.length rs then
+                tb, Map.add varName tb env
+            else sprintf "Error: Attempting to add different length chords and rhythms to phrase %s" varName |> fail
+        // if a combination of variables, retrieve meaning of variables and combine into a phrase
+        | PhraseVar (c, r) ->
+            let p = retrievePhrase env ph |> Phrase
+            p, Map.add varName p env
+    | _ -> fail "Type mismatch: attempting to assign something other than a phrase to variable"
+
+(* Evaluate an assignment operation, retrieving stored info from environment if necessary,
+   returns tuple of return value and new environment *)
 let evalAssignment typeName varName (tb: TuneBuilder) env = 
     match typeName with
     | TVar ->
-        let t = tb
-        match t with
-        | Tune t -> 
-            match t with
-            | TuneLit ps -> 
-                let findPhrase p : Phrase = 
-                    match p with
-                    | PhraseLit _ -> p
-                    | PhraseVar (c,r) -> 
-                        // replace with function
-                        match Map.tryFind c env with
-                        | Some chords ->
-                            match chords with
-                            | Chords chords -> 
-                                match Map.tryFind r env with
-                                | Some rhythms ->
-                                    match rhythms with
-                                    | Rhythms rhythms -> 
-                                        if List.length chords = List.length rhythms then 
-                                            (chords,rhythms) |> PhraseLit
-                                        else fail "Error: Attempting to assign a different length chords and rhythms to a phrase"
-                                    | _ -> fail "Error: variabe not of type Rhythms"
-                                | None -> sprintf "Error: variable %s not defined" r |> fail
-                            | _ -> fail "Error: variable not of type Chords"
-                        | None -> sprintf "Error: variable %s not yet defined" c |> fail
-
-                let tune = ps |> List.map findPhrase |> TuneLit |> Tune
-                tune, Map.add varName tune env
-
-            | TuneVar vs -> 
-                let retrieve p : Phrase = 
-                    match Map.tryFind p env with
-                    | Some phrase -> 
-                        match phrase with
-                        | Phrase phrase -> phrase
-                        | _ -> sprintf "Error: variable %s not of type Tune" varName |> fail
-                    | None -> sprintf  "Error: variable %s is not defined" varName |> fail
-
-                let tune = vs |> List.map retrieve |> TuneLit |> Tune
-                tune, Map.add varName tune env
-        | _ -> fail "Type mismatch: Attempting to assign something other than a tune to a Tune variable"
+        evalTuneAssignment varName tb env
     | PVar ->
-        let p = tb     
-        match p with
-        | Phrase ph ->
-            match ph with
-            | PhraseLit(cs, rs) -> 
-                if List.length cs = List.length rs then
-                    tb, Map.add varName tb env
-                else sprintf "Error: Attempting to add different length chords and rhythms to phrase %s" varName |> fail
-            | PhraseVar (c, r) ->
-                match Map.tryFind c env with
-                | Some chords ->
-                    match chords with
-                    | Chords chords -> 
-                        match Map.tryFind r env with
-                        | Some rhythms ->
-                            match rhythms with
-                            | Rhythms rhythms -> 
-                                if List.length chords = List.length rhythms then 
-                                    let p = (chords,rhythms) |> PhraseLit |> Phrase
-                                    p, Map.add varName p env
-                                else fail "Error: Attempting to assign a different length chords and rhythms to a phrase"
-                            | _ -> fail "Error: variabe not of type Rhythms"
-                        | None -> sprintf "Error: variable %s not defined" r |> fail
-                    | _ -> fail "Error: variable not of type Chords"
-                | None -> sprintf "Error: variable %s not yet defined" c |> fail
-        | _ -> fail "Type mismatch: attempting to assign something other than a phrase to variable"
+        evalPhraseAssignment varName tb env
     | CVar -> 
+        // Ensure right side of assignment is actually chords
         let chords = tb
         match chords with
         | Chords chords -> tb, Map.add varName tb env
         | _ -> fail "Error: atttempting to assign something other than chords to a Chords variable"
     | RVar ->
+        // Ensure right side of assignment is actually rhythms
         let r = tb
         match r with
         | Rhythms r -> tb, Map.add varName tb env
         | _ -> fail "Error: attempting to assign something other than rhythms to a Rhythms variable"
 
-// Choose appropriate notes to create arpeggios, AKA, where the magic happens
+(* Choose appropriate notes to create arpeggios, AKA, where the magic happens 
+        selects correct number of notes to be added to output *)
 let rec arpeggiate (evaled: (int [] * Rhythm) list) = 
     match evaled with 
     | head :: tail -> 
@@ -157,7 +165,7 @@ let rec arpeggiate (evaled: (int [] * Rhythm) list) =
     | _ -> []
 
 
-// Evaluate expressions, returning a return value and a new environment
+(* Evaluate expressions, returning a return value and a new environment *)
 let rec evalExpr (e: Expr) (env: Map<string, TuneBuilder>) = 
     match e with
     | Assignment ((typeName,varName), tb) -> evalAssignment typeName varName tb env
@@ -167,14 +175,14 @@ let rec evalExpr (e: Expr) (env: Map<string, TuneBuilder>) =
 
 (* Evaluate an arpeggify program, first evaluate all assignments in sequence,
     then generate audio from the tune in the program's last line *)
-let eval e env output = 
+let eval e env output bpm = 
    let (tune, _) = evalExpr e env // store return value of last line of program
 
    match tune with
    | Tune tune -> 
        match tune with
        | TuneLit tune ->
-            generateAudio (arpeggiate (evalPhrase tune)) output
+            generateAudio (arpeggiate (evalPhrase tune)) output bpm
             0 // Return 0 to indicate success
         | _ -> fail "Evaluation error, tune interpreted incorrectly"                                                                                                                                                   
    | _ -> fail "Error: Last line of program must be a tune assignment"

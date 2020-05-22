@@ -12,10 +12,10 @@ let generators =
    [| for i in 0 .. 23 -> gen (2.0 ** (float i/12.0) * 261.64) |]
 
 // Add new frequency generator to a certain time of our track
-let addPitch pitch noteSeq = 
+let addPitch step pitch noteSeq = 
     match noteSeq with
     | head :: tail -> let (time, _) = head
-                      (time + 0.25, generators.[pitch]) :: noteSeq
+                      (time + step, generators.[pitch]) :: noteSeq
     | _            -> (0.0, generators.[pitch]) :: noteSeq
 
 
@@ -27,8 +27,9 @@ let writeFile output length fileName =
     (List.map(generate 44100.0 length)) output |> streamToWav 44100 2 fileName
 
 // Entry point to this library, creates wav file of a specified list of notes
-let generateAudio output fileName = 
-    let notes = (List.fold (fun acc elem -> addPitch elem acc) [] output)
+let generateAudio output fileName bpm = 
+    let step = 60.0 / (float bpm) // calculate quarter note length from bpm
+    let notes = (List.fold (fun acc elem -> addPitch step elem acc) [] output)
     let (times,_) = List.unzip notes
     let length = List.max times
     writeFile (arranged notes) (length + 1.0) fileName

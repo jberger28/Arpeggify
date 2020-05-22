@@ -5,14 +5,22 @@ open System.IO
 (* ARPEGGIFY DRIVER *)
 [<EntryPoint>]
 let main argv =
-    printfn "-- ARPEGGIFY INTERPRETER --"
-    if argv.Length <> 2 then
-        // provide usage info
-        printfn "Usage: dotnet run <program.arp> <output.wav>\n"
-        printfn "arpeggify arpeggiates the tune provided in the last line of a program, writing the musical output to a wav file\n"
-        printfn "To run the example program \'blues.arp\' type:\ndotnet run blues.arp blues.wav"
-        printfn "\n## END ARPEGGIFY INTERPRETER ##"
+    printfn "## ARPEGGIFY INTERPRETER ##"
+
+    if argv.Length <> 2 && argv.Length <> 3 then
+        usage
         exit 1
+
+    // Set beats per minute equal to command-line arg or default value
+    let bpm = 
+        if argv.Length = 3 then
+            match System.Int32.TryParse argv.[2] with
+            | true,i when i > 0 -> i
+            | _ -> 
+                printfn "\nProgram failed: BPM must be a positive integer"  
+                usage
+                exit 1                         
+        else 200 // default value
 
     // verify user entered a .wav file as output
     let output = argv.[1]
@@ -32,11 +40,11 @@ let main argv =
     // Parse and evaluate program
     match parse input with
     | Some t ->
-        let result = eval t Map.empty output
+        let result = eval t Map.empty output bpm
         if result = 0 then
             printfn "\nSuccess!"
             printfn "Output written to \"%s\"" output
-            printfn "\n-- END ARPEGGIFY INTERPRETER --"
+            printfn "\n## END ARPEGGIFY INTERPRETER ##"
             0
         else 
             fail "Unable to execute"

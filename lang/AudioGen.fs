@@ -2,7 +2,7 @@
 open FSound.Signal
 open FSound.IO
 
-(* ARPEGGIFY CROSS-PLATFORM LIBRARY FOR GENERATING .WAV FILES USING FSound *)
+(* ARPEGGIFY CROSS-PLATFORM LIBRARY FOR GENERATING .WAV FILES USING FSound Library *)
 
 // return a pitch generator
 let gen pitch = modulate (triangle 15000.0 pitch) (adsr 0.05 1.0 0.05 0.3 0.1 0.05)
@@ -11,7 +11,7 @@ let gen pitch = modulate (triangle 15000.0 pitch) (adsr 0.05 1.0 0.05 0.3 0.1 0.
 let generators =
    [| for i in 0 .. 23 -> gen (2.0 ** (float i/12.0) * 261.64) |]
 
-// Add new frequency generator to a certain time of our track, TODO: update to change time between notes
+// Add new frequency generator to a certain time of our track
 let addPitch pitch noteSeq = 
     match noteSeq with
     | head :: tail -> let (time, _) = head

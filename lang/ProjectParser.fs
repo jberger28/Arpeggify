@@ -63,6 +63,12 @@ let commaSep p = pseq (pmany0 (pleft (pleft p pws0) (pleft (pchar ',') pws0))) (
 (* Parser for items separated by commas and enclosed between parens, allowing for variable whitespace *)
 let parensAndCommas p = pbetween (pleft (pchar '(') pws0) (pright pws0 (pchar ')')) (commaSep p) <!> "parens and commas"
 
+(* Parser for items separated by commas, ending with END *)
+let tuneCommaSep p = pleft (pmany1 (pleft (pleft p pws0) (pleft (pchar ',') pws0))) (pmany1 (pstr "END")) <!> "tune comma sep"
+
+(* Parser for items separated by commas and enclosed between parens, allowing for variable whitespace *)
+let tuneParensAndCommas p = pbetween (pleft (pchar '(') pws0) (pright pws0 (pchar ')')) (tuneCommaSep p) <!> "tune parens and commas"
+
 (* A string of letters *)
 let alpha = pmany1 pletter |>> stringify <!> "alpha"
 
@@ -104,20 +110,20 @@ let rhythm: Parser<Rhythm> = pdigit |>> (fun e -> System.Char.GetNumericValue e 
 let prhythms = parensAndCommas rhythm |>> Rhythms <!> "prhythms"
 
 (* Phrase from literal *)
-let phraselit = pseq (pleft (parensAndCommas chord) (pbetween pws0 pws0 (pchar ','))) (parensAndCommas rhythm) (fun (a,b) -> (a,b)) |>> PhraseLit <!> "phraselit"
+let phraselit = pbetween (pleft (pchar '(') pws0) (pright pws0 (pchar ')')) (pseq (pleft (parensAndCommas chord) (pbetween pws0 pws0 (pchar ','))) (parensAndCommas rhythm) (fun (a,b) -> (a,b))) |>> PhraseLit <!> "phraselit"
 
 (* Phrase from variables *)
 //let phrasevar = parensAndCommas alpha |>> PhraseVar <!> "phrasevar"
-let phrasevar = pbetween (pleft (pchar '(') pws0) (pright pws0 (pchar ')')) (pseq (pleft alpha (pright pws0 (pchar ':')))(pright pws0 alpha) (fun (a,b) -> (a,b))) |>> PhraseVar <!> "phrasevar"
+let phrasevar = pbetween (pleft (pchar '(') pws0) (pright pws0 (pchar ')')) (pseq (pleft alpha (pright pws0 (pchar ',')))(pright pws0 alpha) (fun (a,b) -> (a,b))) |>> PhraseVar <!> "phrasevar"
 
 (* A phrase, either from a literal or from rhythm and chord variables *)
 let phrase: Parser<TuneBuilder> = phraselit <|> phrasevar |>> Phrase <!> "phrase"
 
 (* Tune from phrase literals *)
-let tunelit = parensAndCommas phraselit <|> parensAndCommas phrasevar |>> TuneLit <!> "tunelit"
+let tunelit = tuneParensAndCommas phraselit <|> tuneParensAndCommas phrasevar |>> TuneLit <!> "tunelit"
 
 (* Tune as combination of phrase variables *)
-let tunevar: Parser<Tune> = parensAndCommas alpha |>> TuneVar <!> "tunevar"
+let tunevar: Parser<Tune> = tuneParensAndCommas alpha |>> TuneVar <!> "tunevar"
 
 (* Tune from phrase literals or variables *)
 let tune = tunelit <|> tunevar |>> Tune <!> "tune"
@@ -154,11 +160,10 @@ let sequence =
 exprImpl := assignment <!> "expr"
 
 (* Check for sequence first *)
-let grammar = pleft sequence peof
+let grammar = pleft sequence peof <!> "grammar"
 
-// Parse an arpeggify program
+(* Parse an arpeggify program *)
 let parse input : Expr option = 
-        //let input' = debug input
         let input' = prepare input
         match grammar input' with
         | Success(res,_)     -> Some res

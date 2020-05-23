@@ -1,12 +1,15 @@
 Chords aChords = (BbMa7, G-7, C-7, F7, BbMa7, Eb7, D-7, G7, C-7, F7)
+Rhythms rA = (2,2,2,2,2,2,2,2,4,4)
+
 Chords bChords = (EbMa7, C-7, F7, BbMa7, A-7, D7, G-7,E7, A7, DMa7, C-7, F7)
+Rhythms rB = (4,2,2,4,2,2,4,2,2,4,2,2)
 
 Chords eOneChords = (BbMa7, C-7, F7)
-Chords eTwoChords = (BbMa7, F-7, Bb7)
-Rhythms rA = (2,2,2,2,2,2,2,2,4,4)
-Rhythms rB = (4,2,2,4,2,2,4,2,2,4,2,2)
 Rhythms reOne = (4,2,2)
+
+Chords eTwoChords = (BbMa7, F-7, Bb7)
 Rhythms reTwo = (4,2,2)
+
 Phrase A = (aChords,rA)
 Phrase B = (bChords,rB)
 Phrase eOne = (eOneChords,reOne)

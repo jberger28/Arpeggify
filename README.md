@@ -32,7 +32,7 @@ Example Program 3 (The jazz standard "I've Never Been in Love Before"):
 
 	A file 'example-3.wav' will be generated in the current directory.
 
-** NOTE: Any of the above example programs may be given an additional command-line argument of a positive integer to arpeggiate at a tempo other than the default value of 200 beats per minute
+ NOTE: Any of the above example programs may be given an additional command-line argument of a positive integer to arpeggiate at a tempo other than the default value of 200 beats per minute
 
 
    	 For example, to run 'example-1' from the 'project' directory but at 300 BPM type:

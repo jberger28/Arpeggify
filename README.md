@@ -2,7 +2,7 @@
 
 Video presentation at: https://drive.google.com/file/d/1KsDhl4SLJfKU2DcvFZCXuhpFlqeA6T-Z/view?usp=sharing
 
-Arpeggify generates a .wav file that arpeggiates the tune specified in an Arpeggify program. Capable of arpeggiating any  Major7, Minor7, and Dominant 7 chords, Arpeggify can generate infinitely many pieces of music, which might be used to assist with composition or as backing tracks for practicing jazz improvization.:
+Arpeggify generates a .wav file that arpeggiates the tune specified in an Arpeggify program. Capable of arpeggiating any  Major7, Minor7, and Dominant 7 chords, Arpeggify can generate infinitely many pieces of music, which might be used to assist with composition or as backing tracks for practicing jazz improvization.
 
 Example Program 1 (Basic C blues):
 

@@ -34,8 +34,9 @@ Example Program 3 (The jazz standard "I've Never Been in Love Before"):
 
 ** NOTE: Any of the above example programs may be given an additional command-line argument of a positive integer to arpeggiate at a tempo other than the default value of 200 beats per minute
 
-   	For example, to run 'example-1' from the 'project' directory but at 300 BPM type:
-   	dotnet run ../../examples/example-1.arp example-1.wav 300
+
+   	 For example, to run 'example-1' from the 'project' directory but at 300 BPM type:
+	 dotnet run ../../examples/example-1.arp example-1.wav 300
 
 Test:
 

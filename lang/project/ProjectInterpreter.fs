@@ -8,7 +8,8 @@ type Env = Map<string, TuneBuilder>
 // function to provide usage info
 let usage = 
     printfn "\nUsage:\n\ndotnet run <program.arp> <output.wav>\nor\ndotnet run <program.arp> <output.wav> <beats per minute>"
-    printfn "\nwhere <program.arp> is a path to an Arpeggify program\nand <output.wav> is a string representing the name of the output file\n"
+    printfn "\nwhere <program.arp> is a path to an Arpeggify program\n<output.wav> is a string representing the name of the output file"
+    printfn "and <beats per minute> is an optional positive integer\n"
     printfn "Example: From within 'project' directory type:"
     printfn "dotnet run ../../examples/example-1.arp example-1.wav 200\n"
 

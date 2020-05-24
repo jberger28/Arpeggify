@@ -5,10 +5,10 @@ Arpeggify generates a .wav file that arpeggiates the tune specified in an Arpegg
 Example Programs:
 
 
-	Example 1 (Basic C blues):
+Example 1 (Basic C blues):
 
-		To run from the 'project' directory type:
+	To run from the 'project' directory type:
 
-		'dotnet run ../../examples/example-1.arp example-1.wav'
+	'dotnet run ../../examples/example-1.arp example-1.wav'
 
-		To run from the 'solution directory type:
+	To run from the 'solution directory type:

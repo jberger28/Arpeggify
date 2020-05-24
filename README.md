@@ -38,9 +38,9 @@ Example Program 3 (The jazz standard "I've Never Been in Love Before"):
    	 For example, to run 'example-1' from the 'project' directory but at 300 BPM type:
 	 dotnet run ../../examples/example-1.arp example-1.wav 300
 
-Test:
+Test Suite:
 
-	To run the test from either the 'lang' directory or the 'tests' directory type:
+	To run the tests from either the 'lang' directory or the 'tests' directory type:
 	dotnet test
 
 	

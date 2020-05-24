@@ -3,4 +3,4 @@
 *.out
 obj/
 .vs
-.DS_STORE
+.DS_Store

@@ -109,7 +109,7 @@ let evalTuneAssignment varName tb env =
                     match phrase with
                     | Phrase phrase -> phrase
                     | _ -> sprintf "Error: variable %s not of type Tune" varName |> fail
-                | None -> sprintf  "Error: variable %s is not defined" varName |> fail
+                | None -> sprintf  "Error: variable %s is not defined" p |> fail
 
             let tune = vs |> List.map retrieve |> TuneLit |> Tune
             tune, Map.add varName tune env

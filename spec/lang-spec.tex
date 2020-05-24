@@ -27,7 +27,6 @@
 \usepackage[space]{grffile}
 \usepackage{booktabs}
 \usepackage{amsmath}
-\usepackage{qtree}
 \usepackage{alltt}
 \usepackage[super]{nth}
 
@@ -82,12 +81,27 @@ This problem needs its own programming language because there are infinitely man
 \section{Design Principles}
 The guiding principles are the parallels between music compositions and programs. I've focused particularly on lead sheets for jazz tunes, which provide visual representations of the harmonic and rhythmic structures of the tune. Encoded in this sheet music is information about which chords go where, which types of chords are played, in addition to a feel for the overall structure of the piece. Many jazz compositions are in the form of an "A" section repeated twice, followed by a "B" section then by an "A" section again, and Arpeggify allows us to specify chords and rhythms within phrases and then combine then to form larger pieces of music. Further, in my implementation of arpeggiation, I have made the language be easily extendable and for more chord types and features to easily be added. I've created a general interpretation for arpeggiating chords, which involves representing each note as a numeric value and then calculating the notes in a chord and their corresponding frequencies using formulas. This keeps large parts of my code generic, and allows for new types of chords to be defined and to work right away.
 
+\newpage
 \section{Example Programs}
-1) A simple 12-bar C blues progression. From within the 'lang' project directory, to run type: 
+\textbf{1) A simple 12-bar C blues progression. }
 
-\textbf{`dotnet run ../examples/example-1.arp example-1.wav'}
+\bigskip
+From within the 'project' directory, to run type: 
 
-and an audio file `example-1.wav' will be generated in the current directory.
+\begin{verbatim}
+    dotnet run ../../examples/example-1.arp example-1.wav
+\end{verbatim}
+
+From within the 'lang' directory, to run type:
+
+\begin{verbatim}
+    dotnet run --project project/project.fsproj ../examples/example-1.arp example-1.wav
+\end{verbatim}
+
+and an audio file \verb example-1.wav  will be generated in the current directory.
+
+\bigskip
+Program:
 
 \begin{verbatim}
 Chords aChords = (C7, C7, C7, C7)
@@ -105,12 +119,28 @@ Phrase pC = (cChords,rC)
 Tune blues = (pA,pB,pC,END)
 \end{verbatim}
 
-\newpage
-2) The jazz standard 'Giant Steps.' From within the 'lang' project directory, to run type: 
+\bigskip
 
-\textbf{`dotnet run ../examples/example-2.arp example-2.wav'}
+\textbf{2) The jazz standard 'Giant Steps.'}
 
-and a file `example-2.wav' will be generated in the current directory.
+\bigskip
+
+From within the 'project' directory, to run type: 
+
+\begin{verbatim}
+    dotnet run ../../examples/example-2.arp example-2.wav
+\end{verbatim}
+
+From within the 'lang' directory, to run type:
+
+\begin{verbatim}
+    dotnet run --project project/project.fsproj ../examples/example-2.arp example-2.wav
+\end{verbatim}
+
+and an audio file \verb example-2.wav  will be generated in the current directory.
+
+\bigskip
+Program:
 \begin{verbatim}
 Chords cOne = (BMa7, D7,  GMa7, Bb7, EbMa7, A-7, D7)
 Rhythms rOne = (2,2,2,2,4,2,2)
@@ -127,12 +157,27 @@ Rhythms rFour = (4,2,2,4,2,2)
 Tune giantSteps = ((cOne,rOne), (cTwo,rTwo),(cThree,rThree),(cFour, rFour), END)
 \end{verbatim}
 
-3) The jazz standard "I've Never Been in Love Before." From within the 'lang' project directory, to run type: 
+\bigskip
 
-\textbf{`dotnet run ../examples/example-3.arp example-3.wav'}
+\textbf{3) The jazz standard "I've Never Been in Love Before."}
 
-and a file `example-3.wav' will be generated in the current directory.
+\bigskip
 
+From within the 'project' directory, to run type: 
+
+\begin{verbatim}
+    dotnet run ../../examples/example-3.arp example-3.wav
+\end{verbatim}
+
+From within the 'lang' directory, to run type:
+
+\begin{verbatim}
+    dotnet run --project project/project.fsproj ../examples/example-3.arp example-3.wav
+\end{verbatim}
+
+and an audio file \verb example-3.wav  will be generated in the current directory.
+
+Program:
 
 \begin{verbatim}
 Chords aChords = (BbMa7, G-7, C-7, F7, BbMa7, Eb7, D-7, G7, C-7, F7)
@@ -193,7 +238,7 @@ Formal grammar of Arpeggify:
     <Accidental>    ::= <Root> <Symbol>
     <Symbol>        ::= #
                       | b
-    <Extension>     ::= Ma7
+    <Extension>     ::= Ma7https://www.overleaf.com/project/5eb6f4c4b2c35b0001eb087b
                       | -7
                       | 7
     <Rhythms>       ::= (n \in \{positive ints\} +)
@@ -201,6 +246,7 @@ Formal grammar of Arpeggify:
 \end{alltt}
 
 The language is built of tunes which are built of phrases which are build of combinations of chords and rhythms. Rhythms are just positive integers and chords and combinations of roots—a note or a note and an accidental—and extensions specifying the type of chord to be arpeggiated.
+
 \section{Semantics}
 
 \begin{enumerate}
@@ -441,6 +487,6 @@ Meaning: Sequence evaluates two newline-separated expression, evaluating the fir
     \end{enumerate}
 
 \section{Remaining Work}
-My next step is to implement support for different tempos. My goal is to have a standard tempo which can be overridden by an additional command line argument. This should be easy to implement, since when I arpeggiate chords I play one note per beat and we can convert beats per minute to quarter note length in second by dividing 6000 by our BPM value.
+I would like to continue working on Arpeggify, and I think my next step is to add support for more advanced types of chords — diminished chords, and chords with more extensions/different bass notes. Then, I'd really like to have the language arpeggiate more intelligently. Rather than simply starting each chord at the root, pehaps I could have the language make decisions regarding which notes to start with and whether to arpeggiate up or down to get smoother voice leading.
 % DO NOT DELETE ANYTHING BELOW THIS LINE
 \end{document}
